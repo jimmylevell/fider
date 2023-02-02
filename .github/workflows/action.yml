@@ -39,7 +39,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       -
         name: Build fider docker
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           load: true
@@ -48,7 +48,7 @@ jobs:
             ghcr.io/jimmylevell/fider/fider:latest
       -
         name: Push fider docker
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           push: true
           context: .
