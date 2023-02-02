@@ -1,0 +1,64 @@
+version: "3.9"
+
+services:
+  feedback:
+    image: ghcr.io/jimmylevell/fider/fider:latest
+    networks:
+      - traefik-public
+      - levell
+    environment:
+      BASE_URL: https://feedback.app.levell.ch
+
+      # Connection string to the PostgreSQL database
+      DATABASE_URL_FIDER: DOCKER-SECRET->DATABASE_URL_FIDER
+
+      # Generate a 512-bit secret here https://www.allkeysgenerator.com/Random/Security-Encryption-Key-Generator.aspx
+      JWT_SECRET: DOCKER-SECRET->JWT_SECRET_FIDER
+
+      # From which account e-mails will be sent
+      EMAIL_NOREPLY: noreply@thilo.scout.ch
+
+      # EMAIL
+      EMAIL_SMTP_HOST: smtp.sendgrid.net
+      EMAIL_SMTP_PORT: 465
+      EMAIL_SMTP_USERNAME: apikey
+      EMAIL_SMTP_PASSWORD: DOCKER-SECRET->EMAIL_SMTP_PASSWORD_FIDER
+      EMAIL_SMTP_ENABLE_STARTTLS: 'true'
+    secrets:
+      - DATABASE_URL_FIDER
+      - JWT_SECRET_FIDER
+      - EMAIL_SMTP_PASSWORD_FIDER
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 1
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true # enable traefik
+        - traefik.docker.network=traefik-public # put it in the same network as traefik
+        - traefik.constraint-label=traefik-public # assign the same label as traefik so it can be discovered
+        - traefik.http.routers.fider.rule=Host(`fider.app.levell.ch`) # listen to port 80 for request to APP_DOMAIN (use together with the line below)
+        - traefik.http.routers.fider.entrypoints=http
+        - traefik.http.routers.fider.middlewares=https-redirect
+        - traefik.http.middlewares.fider.redirectscheme.scheme=https # redirect traffic to https
+        - traefik.http.middlewares.fider.redirectscheme.permanent=true # redirect traffic to https
+        - traefik.http.routers.fider-secured.rule=Host(`fider.app.levell.ch`) # listen to port 443 for request to APP_DOMAIN (use together with the line below)
+        - traefik.http.routers.fider-secured.entrypoints=https
+        - traefik.http.routers.fider-secured.tls.certresolver=le # use the Let's Encrypt certificate we set up earlier
+        - traefik.http.services.fider-secured.loadbalancer.server.port=3000 # ask Traefik to search for port of the service container
+
+networks:
+  traefik-public:
+    external: true
+  levell:
+    external: true
+
+secrets:
+  DATABASE_URL_FIDER:
+    external: true
+  JWT_SECRET_FIDER:
+    external: true
+  EMAIL_SMTP_PASSWORD_FIDER:
+    external: true
