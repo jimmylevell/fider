@@ -7,7 +7,7 @@ services:
       - traefik-public
       - levell
     environment:
-      BASE_URL: https://feedback.app.levell.ch
+      BASE_URL: https://fider.app.levell.ch
 
       # Connection string to the PostgreSQL database
       DATABASE_URL: DOCKER-SECRET->DATABASE_URL_FIDER
