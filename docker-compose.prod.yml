@@ -10,7 +10,7 @@ services:
       BASE_URL: https://feedback.app.levell.ch
 
       # Connection string to the PostgreSQL database
-      DATABASE_URL_FIDER: DOCKER-SECRET->DATABASE_URL_FIDER
+      DATABASE_URL: DOCKER-SECRET->DATABASE_URL_FIDER
 
       # Generate a 512-bit secret here https://www.allkeysgenerator.com/Random/Security-Encryption-Key-Generator.aspx
       JWT_SECRET: DOCKER-SECRET->JWT_SECRET_FIDER
